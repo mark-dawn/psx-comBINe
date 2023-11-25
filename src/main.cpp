@@ -461,7 +461,7 @@ void dumpCombinedBins(const SystemVariables &vars, const CueHandler &cueIn,
 	}
 	
 	//Current byte in array, bytes in each file, and total bytes from all files
-	size_t arrBytes = 0, fileBytes = 0, totalBytes = 0;
+	size_t arrBytes, fileBytes = 0, totalBytes = 0;
 	
 	//Create a heap byte array (From defined size in header)
 	char *byteArray;
@@ -520,25 +520,21 @@ void dumpCombinedBins(const SystemVariables &vars, const CueHandler &cueIn,
 		
 		
 		//Get all the bytes from the current input and push them to output.
-		int bytesRead;
 		do {
 			binFileIn.read(byteArray, _def_ARR_SIZE);
-			bytesRead = binFileIn.gcount();
-			totalBytes += bytesRead;
-			fileBytes += bytesRead;
-			binFileOut.write(byteArray, bytesRead);
-		} while (bytesRead == _def_ARR_SIZE);
+			arrBytes = binFileIn.gcount();
+			fileBytes += arrBytes;
+			binFileOut.write(byteArray, arrBytes);
+		} while (arrBytes == _def_ARR_SIZE);
 		
 		//Close the current file for next loop
 		binFileIn.close();
+		totalBytes += fileBytes;
 		
 		//Report how many megabytes the file is, that it is done, then reset.
 		std::cout << padMiBStr(fileBytes, 3) << std::endl;
 		fileBytes = 0;
 	}
-	
-	//Flush what is left of the byte array to the output file
-	if(arrBytes != 0) binFileOut.write(byteArray, arrBytes);
 
 	//Delete heap byte array
 	delete[] byteArray;
